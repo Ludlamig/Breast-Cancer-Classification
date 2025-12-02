@@ -31,5 +31,48 @@ print(variables)
 print(X[:5]) # features ranked from 1-10
 print(y[:5]) # 2 for benign, 4 for malignant (these are all benign)
 
+# logistic regression model from scratch (similar to example from class)
 
+# sigmoid function
+def sigmoid(z):
+    return 1 / (1 + np.exp(-z))
 
+# loss function
+def loss(true, pred):
+    loss = -np.mean(true * np.log(pred) + (1 - true) * np.log(1 - pred))
+    return loss
+
+# logistic regression class
+class LogisticRegression:
+    # Initialize object
+    def __init__(self, dimensions):
+        self.w = np.zeros((dimensions, 1))
+        self.b = 0.0
+    
+    # Probability prediction
+    def predict_proba(self, X):
+        z = np.dot(X, self.w) + self.b
+        return sigmoid(z)
+    # Label prediction
+    def predict(self, X, threshold=0.5):
+        return (self.predict_proba(X) >= threshold).astype(int)
+    
+    # Update weights and bias
+    def fit(self, X, y, lr=0.01, epochs=1000):
+        N = X.shape[0]
+
+        for epoch in range(epochs):
+            # Predict probabilities
+            y_pred = self.predict_proba(X)
+            
+            loss_value = loss(y, y_pred)
+
+            # Compute gradients
+            dw = (1 / N) * np.dot(X.T, (y_pred - y))
+            db = np.mean(y_pred - y)
+
+            # Update weights and bias
+            self.w -= lr * dw
+            self.b -= lr * db
+
+# Training the model
