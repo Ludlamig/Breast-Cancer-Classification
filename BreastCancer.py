@@ -75,4 +75,14 @@ class LogisticRegression:
             self.w -= lr * dw
             self.b -= lr * db
 
-# Training the model
+# Preprocess the data
+y = (y == 4).astype(int)  # 1 for malignant, 0 for benign
+# print(y[:20]) check change
+# what size
+print(X.shape, y.shape)
+
+# Initialize and train the model
+model = LogisticRegression(dimensions=X.shape[1])
+model.fit(X, y, lr=0.01, epochs=1000)
+
+
