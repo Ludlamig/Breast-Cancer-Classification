@@ -37,6 +37,14 @@ y = (y == 4).astype(int)  # 1 for malignant, 0 for benign
 # what size
 print(X.shape, y.shape)
 
+# scale the features to have mean 0 and variance 1
+X = (X - np.mean(X, axis=0)) / np.std(X, axis=0)
+print(X[:5]) # check change shows NAN in col 5
+
+# handle NANs by replacing them with 0
+X = np.nan_to_num(X, nan = 5)
+print(X[:5]) # check change
+
 # Split the data into training testing and validation sets
 
 trainingx = X[:500]
@@ -70,12 +78,13 @@ class LogisticRegression:
     def predict_proba(self, X):
         z = np.dot(X, self.w) + self.b
         return sigmoid(z)
+    
     # Label prediction
     def predict(self, X, threshold=0.5):
         return (self.predict_proba(X) >= threshold).astype(int)
     
     # Update weights and bias
-    def fit(self, X, y, lr=0.01, epochs=1000):
+    def fit(self, X, y, lr=0.0001, epochs=1000):
         N = X.shape[0]
 
         for epoch in range(epochs):
@@ -97,5 +106,8 @@ class LogisticRegression:
 model = LogisticRegression(dimensions=trainingx.shape[1])
 model.fit(trainingx, trainingy, lr=0.01, epochs=1000)
 
+# Evaluate the model
+probs = model.predict_proba(testingx)
+print("Predicted probabilities on test set:", probs.flatten())
 
 
