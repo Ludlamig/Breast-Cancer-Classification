@@ -31,6 +31,23 @@ print(variables)
 print(X[:5]) # features ranked from 1-10
 print(y[:5]) # 2 for benign, 4 for malignant (these are all benign)
 
+# Preprocess the data
+y = (y == 4).astype(int)  # 1 for malignant, 0 for benign
+# print(y[:20]) check change
+# what size
+print(X.shape, y.shape)
+
+# Split the data into training testing and validation sets
+
+trainingx = X[:500]
+trainingy = y[:500]
+
+testingx = X[500:600]
+testingy = y[500:600]
+
+validationx = X[600:]
+validationy = y[600:]
+
 # logistic regression model from scratch (similar to example from class)
 
 # sigmoid function
@@ -75,14 +92,10 @@ class LogisticRegression:
             self.w -= lr * dw
             self.b -= lr * db
 
-# Preprocess the data
-y = (y == 4).astype(int)  # 1 for malignant, 0 for benign
-# print(y[:20]) check change
-# what size
-print(X.shape, y.shape)
 
 # Initialize and train the model
-model = LogisticRegression(dimensions=X.shape[1])
-model.fit(X, y, lr=0.01, epochs=1000)
+model = LogisticRegression(dimensions=trainingx.shape[1])
+model.fit(trainingx, trainingy, lr=0.01, epochs=1000)
+
 
 
