@@ -37,15 +37,23 @@ y = (y == 4).astype(int)  # 1 for malignant, 0 for benign
 # what size
 print(X.shape, y.shape)
 
+# handle NANs by replacing them with mean of the column
+col_means = np.nanmean(X, axis=0)
+inds = np.where(np.isnan(X))    
+X[inds] = np.take(col_means, inds[1])
+print(X[:5]) # check change
+
 # scale the features to have mean 0 and variance 1
 X = (X - np.mean(X, axis=0)) / np.std(X, axis=0)
-print(X[:5]) # check change shows NAN in col 5
-
-# handle NANs by replacing them with 0
-X = np.nan_to_num(X, nan = 5)
 print(X[:5]) # check change
 
 # Split the data into training testing and validation sets
+
+# randomize values before splitting
+np.random.seed(21)
+indices = np.random.permutation(X.shape[0])
+X = X[indices]
+y = y[indices]
 
 trainingx = X[:500]
 trainingy = y[:500]
@@ -84,18 +92,16 @@ class LogisticRegression:
         return (self.predict_proba(X) >= threshold).astype(int)
     
     # Update weights and bias
-    def fit(self, X, y, lr=0.0001, epochs=1000):
+    def fit(self, X, y, lr=0.0001, epochs=1000, lamRegulation=0.01):
         N = X.shape[0]
 
         for epoch in range(epochs):
             # Predict probabilities
             y_pred = self.predict_proba(X)
-            
-            loss_value = loss(y, y_pred)
 
             # Compute gradients
-            dw = (1 / N) * np.dot(X.T, (y_pred - y))
-            db = np.mean(y_pred - y)
+            dw = (1 / N) * np.dot(X.T, (y_pred - y)) + (lamRegulation / N) * self.w
+            db = np.mean(y_pred - y) + (lamRegulation / N) * self.b
 
             # Update weights and bias
             self.w -= lr * dw
@@ -104,10 +110,17 @@ class LogisticRegression:
 
 # Initialize and train the model
 model = LogisticRegression(dimensions=trainingx.shape[1])
-model.fit(trainingx, trainingy, lr=0.01, epochs=1000)
+model.fit(trainingx, trainingy, lr=0.001, epochs=5000, lamRegulation = 0.01)
 
 # Evaluate the model
 probs = model.predict_proba(testingx)
-print("Predicted probabilities on test set:", probs.flatten())
+preds = model.predict(testingx)
+test_loss = loss(testingy, probs)
+accuracy = np.mean(preds.flatten() == testingy)
+print(f"Test Loss: {test_loss:.4f}, Test Accuracy: {accuracy:.4f}")
+
+
+# Validate the model
+
 
 
