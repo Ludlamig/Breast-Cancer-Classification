@@ -96,7 +96,6 @@ class LogisticRegression:
             self.b -= lr * db
 
 
-
 # Initialize and train the model
 model = LogisticRegression(dimensions=trainingx.shape[1])
 model.fit(trainingx, trainingy, lr=0.01, epochs=5000)
@@ -108,10 +107,31 @@ preds = model.predict(testingx)
 test_loss = loss(testingy, probs)
 accuracy = np.mean(preds == testingy)
 
+print("Test Results:")
 print(f"Test Loss: {test_loss:.4f}, Test Accuracy: {accuracy:.4f}")
 
+# Validate the model
 
+# try different learning rate and epochs
+# print the max validation accuracy after training with different hyperparameters
 
+best_epochs = 5000
+best_lr = 0.01
 
+for lr in [0.001, 0.01, 0.1]:
+    for epochs in [1000, 5000, 10000]:
+        model = LogisticRegression(dimensions=trainingx.shape[1])
+        model.fit(trainingx, trainingy, lr=lr, epochs=epochs)
 
+        val_probs = model.predict_proba(validationx)
+        val_loss = loss(validationy, val_probs)
+        val_preds = model.predict(validationx)
+        val_accuracy = np.mean(val_preds == validationy)
 
+        #save if best model so far
+        if accuracy < val_accuracy:
+            accuracy = val_accuracy
+            best_lr = lr
+            best_epochs = epochs
+print("Best Validation Results:")
+print(f"Learning Rate: {best_lr}, Epochs: {best_epochs}, Validation Accuracy: {accuracy:.4f}")
