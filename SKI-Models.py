@@ -141,16 +141,22 @@ models = [
     ("SVM (RBF)", svm_cm)
 ]
 
-for name, cm in models:
-    fig, ax = plt.subplots(figsize=(5, 5))
-    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=["Benign", "Malignant"])
+# Create side-by-side plots
+fig, axes = plt.subplots(1, 3, figsize=(15, 5))
 
+for ax, (name, cm) in zip(axes, models):
+    disp = ConfusionMatrixDisplay(
+        confusion_matrix=cm,
+        display_labels=["Benign", "Malignant"]
+    )
     disp.plot(ax=ax, cmap="Blues", colorbar=False)
-    plt.title("Confusion Matrix — {name}")
-    plt.xlabel("Predicted Label")
-    plt.ylabel("True Label")
-    plt.tight_layout()
-    plt.show()
+    ax.set_title(name)
+    ax.set_xlabel("Predicted Label")
+    ax.set_ylabel("True Label")
+
+plt.suptitle("Confusion Matrices Comparison", fontsize=14)
+plt.tight_layout()
+plt.show()
 
 # combine
 results = [
