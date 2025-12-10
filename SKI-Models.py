@@ -2,7 +2,6 @@
 # Class : CSE 432 Machine Learning, Miami University
 # Date  : 2024-06-15
 # Description : SKI Models for Breast Cancer Detection
-import numpy as np
 
 # Random Forest Classification on Breast Cancer Wisconsin Diagnostic Dataset
 # Using scikit-learn and chatGPT assistance
@@ -12,7 +11,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 import pandas as pd
-import numpy as np
+import BreastCancer 
+
 
 # -----------------------------
 # Load dataset
@@ -45,9 +45,6 @@ rf.fit(X_train, y_train)
 # -----------------------------
 y_pred = rf.predict(X_test)
 
-print("Accuracy:", accuracy_score(y_test, y_pred))
-print("\nClassification Report:\n", classification_report(y_test, y_pred))
-print("\nConfusion Matrix:\n", confusion_matrix(y_test, y_pred))
 
 # -----------------------------
 # Feature Importance
@@ -55,9 +52,7 @@ print("\nConfusion Matrix:\n", confusion_matrix(y_test, y_pred))
 importances = pd.Series(rf.feature_importances_, index=X.columns)
 importances = importances.sort_values(ascending=False)
 
-print("\nTop 10 Important Features:\n", importances.head(10))
-
-
+#---------------------------------------------------------------------------
 
 # SVM on Breast Cancer Wisconsin Diagnostic Dataset
 # Using scikit-learn and chatGPT assistance
@@ -101,6 +96,80 @@ svm_model.fit(X_train, y_train)
 # -----------------------------
 y_pred = svm_model.predict(X_test)
 
-print("Accuracy:", accuracy_score(y_test, y_pred))
-print("\nClassification Report:\n", classification_report(y_test, y_pred))
-print("\nConfusion Matrix:\n", confusion_matrix(y_test, y_pred))
+# ----------------------------
+# Compare models
+# ----------------------------
+
+# Time to completion
+import time
+
+# Random Forest
+start_time = time.perf_counter()
+rf.fit(X_train, y_train)
+rf_time = time.perf_counter() - start_time
+
+y_pred = rf.predict(X_test)
+
+rf_acc = accuracy_score(y_test, y_pred)
+rf_cm = confusion_matrix(y_test, y_pred)
+tn, fp, fn, tp = rf_cm.ravel()
+
+#SVM 
+start_time = time.perf_counter()
+svm_model.fit(X_train, y_train)
+svm_time = time.perf_counter() - start_time
+
+y_pred = svm_model.predict(X_test)
+
+svm_acc = accuracy_score(y_test, y_pred)
+svm_cm = confusion_matrix(y_test, y_pred)
+tn, fp, fn, tp = svm_cm.ravel()
+
+bcResults = BreastCancer.run_scratch_logistic_regression()
+bc_cm = bcResults["confusion_matrix"]
+bc_acc = bcResults["accuracy"]
+bc_time = bcResults["training_time"]
+
+
+# Confusion Matrix
+import matplotlib.pyplot as plt
+from sklearn.metrics import ConfusionMatrixDisplay
+
+models = [
+    ("Logistic Regression (Scratch)", bc_cm),
+    ("Random Forest", rf_cm),
+    ("SVM (RBF)", svm_cm)
+]
+
+for name, cm in models:
+    fig, ax = plt.subplots(figsize=(5, 5))
+    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=["Benign", "Malignant"])
+
+    disp.plot(ax=ax, cmap="Blues", colorbar=False)
+    plt.title("Confusion Matrix — {name}")
+    plt.xlabel("Predicted Label")
+    plt.ylabel("True Label")
+    plt.tight_layout()
+    plt.show()
+
+# combine
+results = [
+    {
+        "Model": "Logistic Regression (From Scratch)",
+        "Accuracy": bc_acc,
+        "Training Time (s)": bc_time
+    },
+    {
+        "Model": "Random Forest",
+        "Accuracy": rf_acc,
+        "Training Time (s)": rf_time
+    },
+    {
+        "Model": "SVM (RBF Kernel)",
+        "Accuracy": svm_acc,
+        "Training Time (s)": svm_time
+    }
+]
+
+results_df = pd.DataFrame(results)
+print(results_df)

@@ -3,6 +3,8 @@
 # Date   : 2024-06-15
 # Description : Breast Cancer Detection using Machine Learning
 
+# From scratch ---------------------------------->
+
 import numpy as np
 
 # Obtain the dataset from UCI Machine Learning Repository 
@@ -135,3 +137,29 @@ for lr in [0.001, 0.01, 0.1]:
             best_epochs = epochs
 print("Best Validation Results:")
 print(f"Learning Rate: {best_lr}, Epochs: {best_epochs}, Validation Accuracy: {accuracy:.4f}")
+
+# Begin AI Assisted metrics comparisons ----------------------- > 
+
+def run_scratch_logistic_regression():
+    import time
+    from sklearn.metrics import confusion_matrix, classification_report
+
+    model = LogisticRegression(dimensions=trainingx.shape[1])
+
+    start_time = time.perf_counter()
+    model.fit(trainingx, trainingy, lr=0.01, epochs=5000)
+    train_time = time.perf_counter() - start_time
+
+    probs = model.predict_proba(testingx)
+    preds = model.predict(testingx)
+
+    accuracy = np.mean(preds == testingy)
+    bc_cm = confusion_matrix(testingy, preds)
+    tn, fp, fn, tp = bc_cm.ravel()
+
+
+    return {
+        "accuracy": accuracy,
+        "training_time": train_time,
+        "confusion_matrix": bc_cm
+    }
